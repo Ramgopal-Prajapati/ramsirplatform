@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+{% block title %}Login - Ram Sir Platform{% endblock %}
+{% block extra_css %}
+<style>
+.auth-section { min-height:85vh; display:flex; align-items:center; background: linear-gradient(135deg, #f8f9ff, #fff0eb); }
+.auth-card { background:white; border-radius:25px; padding:45px; box-shadow:0 20px 60px rgba(0,0,0,0.1); }
+</style>
+{% endblock %}
+{% block content %}
+<section class="auth-section">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-5 col-md-7">
+                <div class="auth-card">
+                    <div class="text-center mb-4">
+                        <div style="font-size:2.5rem">🔐</div>
+                        <h2 style="font-weight:800">Welcome Back!</h2>
+                        <p class="text-muted">Login to continue learning</p>
+                    </div>
+                    <form method="POST" action="/accounts/login/">
+                        {% csrf_token %}
+                        <input type="hidden" name="next" value="{{ next }}">
+                        <div class="mb-3">
+                            <label class="form-label">Username</label>
+                            <input type="text" name="username" class="form-control form-control-lg" placeholder="Your username" required>
+                        </div>
+                        <div class="mb-4">
+                            <label class="form-label">Password</label>
+                            <input type="password" name="password" class="form-control form-control-lg" placeholder="Your password" required>
+                        </div>
+                        {% if form.errors %}
+                        <div class="alert alert-danger">Invalid username or password. Please try again.</div>
+                        {% endif %}
+                        <button type="submit" class="btn btn-primary-custom w-100 btn-lg">
+                            <i class="fas fa-sign-in-alt me-2"></i>Login
+                        </button>
+                    </form>
+                    <div class="text-center mt-4">
+                        <p class="text-muted">New student? <a href="/accounts/register/" style="color:var(--primary);font-weight:600">Register Free</a></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

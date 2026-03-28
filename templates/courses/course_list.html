@@ -1,0 +1,108 @@
+{% extends 'base.html' %}
+{% block title %}All Courses - Ram Sir Platform{% endblock %}
+{% block extra_css %}
+<style>
+.filter-bar { background: white; border-radius: 15px; padding: 20px 25px; box-shadow: 0 5px 20px rgba(0,0,0,0.06); margin-bottom: 30px; }
+.filter-btn { border: 2px solid #e9ecef; background: white; color: #666; padding: 7px 16px; border-radius: 25px; font-size: 0.85rem; font-weight: 500; cursor: pointer; transition: all 0.3s; text-decoration: none; display: inline-block; }
+.filter-btn:hover, .filter-btn.active { background: var(--primary); border-color: var(--primary); color: white; }
+.page-hero { background: linear-gradient(135deg, #1a1a2e, #16213e); color: white; padding: 60px 0; }
+.course-thumb-placeholder { height: 180px; display: flex; align-items: center; justify-content: center; font-size: 3rem; }
+.search-box { border-radius: 30px; border: 2px solid #e9ecef; padding: 12px 20px; font-size: 1rem; }
+.search-box:focus { border-color: var(--primary); box-shadow: 0 0 0 0.2rem rgba(255,107,53,0.15); outline: none; }
+.empty-state { text-align: center; padding: 80px 20px; color: #adb5bd; }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<div class="page-hero">
+    <div class="container">
+        <h1 class="fw-800" style="font-weight:800">📚 All Courses</h1>
+        <p class="opacity-75 mt-2">Explore {{ courses|length }} courses — Free & Premium — taught by Ram Sir</p>
+        <form method="GET" class="mt-3 d-flex gap-3" style="max-width:500px">
+            <input type="text" name="q" class="form-control search-box flex-grow-1"
+                   placeholder="Search courses..." value="{{ search_query|default:'' }}">
+            <button type="submit" class="btn btn-primary-custom px-4">Search</button>
+        </form>
+    </div>
+</div>
+
+<div class="container py-5">
+    <!-- Filters -->
+    <div class="filter-bar">
+        <div class="row align-items-center g-3">
+            <div class="col-auto">
+                <strong style="font-size:0.9rem">Filter:</strong>
+            </div>
+            <div class="col">
+                <div class="d-flex flex-wrap gap-2">
+                    <a href="/courses/" class="filter-btn {% if not selected_type and not selected_category and not selected_level %}active{% endif %}">All</a>
+                    <a href="/courses/?type=free" class="filter-btn {% if selected_type == 'free' %}active{% endif %}">🆓 Free</a>
+                    <a href="/courses/?type=paid" class="filter-btn {% if selected_type == 'paid' %}active{% endif %}">💎 Premium</a>
+                    <span class="text-muted align-self-center">|</span>
+                    {% for cat in categories %}
+                    <a href="/courses/?category={{ cat.id }}" class="filter-btn {% if selected_category == cat.id|stringformat:'s' %}active{% endif %}">{{ cat.name }}</a>
+                    {% endfor %}
+                    <span class="text-muted align-self-center">|</span>
+                    <a href="/courses/?level=beginner" class="filter-btn {% if selected_level == 'beginner' %}active{% endif %}">Beginner</a>
+                    <a href="/courses/?level=intermediate" class="filter-btn {% if selected_level == 'intermediate' %}active{% endif %}">Intermediate</a>
+                    <a href="/courses/?level=advanced" class="filter-btn {% if selected_level == 'advanced' %}active{% endif %}">Advanced</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Course Grid -->
+    {% if courses %}
+    <div class="row g-4">
+        {% for course in courses %}
+        <div class="col-lg-3 col-md-6">
+            <div class="card-course h-100">
+                <div class="course-thumb-placeholder" style="background: linear-gradient(135deg,
+                    {% if course.category.name == 'Programming' %}#667eea,#764ba2
+                    {% elif course.category.name == 'Data Science' %}#f093fb,#f5576c
+                    {% elif course.category.name == 'AI & ML' %}#4facfe,#00f2fe
+                    {% elif course.category.name == 'Database' %}#43e97b,#38f9d7
+                    {% elif course.category.name == 'Web Development' %}#fa709a,#fee140
+                    {% elif course.category.name == 'Cloud Computing' %}#a18cd1,#fbc2eb
+                    {% else %}#667eea,#764ba2{% endif %})">
+                    <span>{% if 'Python' in course.title %}🐍{% elif 'Java' in course.title and 'Script' not in course.title %}☕{% elif 'C++' in course.title %}⚡{% elif 'C ' in course.title or course.title == 'C Programming' %}🔧{% elif 'SQL' in course.title %}🗄️{% elif 'AI' in course.title or 'Generative' in course.title %}🤖{% elif 'DSA' in course.title %}🌳{% elif 'Django' in course.title %}🌐{% elif 'Power BI' in course.title %}📊{% elif 'Cloud' in course.title or 'AWS' in course.title %}☁️{% elif 'Prompt' in course.title %}💬{% elif 'ML' in course.title or 'Machine' in course.title %}🧠{% elif 'Data' in course.title %}📈{% else %}📚{% endif %}</span>
+                </div>
+                <div class="p-4">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        {% if course.course_type == 'free' %}
+                        <span class="badge-free">FREE</span>
+                        {% else %}
+                        <span class="badge-paid">₹{{ course.price }}</span>
+                        {% endif %}
+                        <span class="badge-level">{{ course.get_level_display }}</span>
+                    </div>
+                    <h5 class="mb-2" style="font-size:0.95rem;font-weight:700">{{ course.title }}</h5>
+                    <p class="text-muted mb-3" style="font-size:0.8rem">{{ course.short_description|truncatechars:80 }}</p>
+                    <div class="d-flex gap-3 text-muted mb-3" style="font-size:0.78rem">
+                        <span><i class="fas fa-book me-1"></i>{{ course.total_modules }} modules</span>
+                        {% if course.duration %}<span><i class="fas fa-clock me-1"></i>{{ course.duration }}</span>{% endif %}
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <span class="stars" style="font-size:0.8rem">★★★★★</span>
+                            <small class="text-muted">({{ course.students_count }})</small>
+                        </div>
+                        <a href="/courses/{{ course.slug }}/" class="btn btn-sm btn-primary-custom">
+                            {% if course.course_type == 'free' %}Enroll Free{% else %}View Course{% endif %}
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <div style="font-size:4rem">🔍</div>
+        <h4 class="mt-3">No courses found</h4>
+        <p>Try different filters or <a href="/courses/" style="color:var(--primary)">view all courses</a></p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

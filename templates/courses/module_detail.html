@@ -1,0 +1,225 @@
+{% extends 'base.html' %}
+{% load course_extras %}
+{% block title %}{{ module.title }} - {{ course.title }} | Ram Sir{% endblock %}
+{% block extra_css %}
+<style>
+body { background: #f0f2f5; }
+.learning-layout { display: flex; min-height: calc(100vh - 70px); }
+/* Sidebar */
+.course-sidebar-nav { width: 320px; flex-shrink: 0; background: #1a1a2e; overflow-y: auto; max-height: calc(100vh - 70px); position: sticky; top: 70px; }
+.sidebar-header { background: rgba(255,107,53,0.15); padding: 20px; border-bottom: 1px solid rgba(255,255,255,0.08); }
+.sidebar-header h6 { color: white; font-weight: 700; margin: 0; font-size: 0.85rem; }
+.sidebar-header small { color: #adb5bd; }
+.progress-mini { height: 4px; background: rgba(255,255,255,0.1); border-radius: 2px; margin-top: 8px; }
+.progress-mini-bar { height: 100%; background: var(--gradient); border-radius: 2px; transition: width 0.5s; }
+.module-nav-item { display: block; padding: 12px 20px; border-bottom: 1px solid rgba(255,255,255,0.05); cursor: pointer; text-decoration: none; transition: all 0.2s; }
+.module-nav-item:hover { background: rgba(255,255,255,0.05); }
+.module-nav-item.active { background: rgba(255,107,53,0.15); border-left: 3px solid var(--primary); }
+.module-nav-item .mnum { width: 28px; height: 28px; border-radius: 50%; background: rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: center; font-size: 0.75rem; color: #adb5bd; flex-shrink: 0; }
+.module-nav-item.active .mnum { background: var(--primary); color: white; }
+.module-nav-item.done .mnum { background: #28a745; color: white; }
+.module-nav-item .mtitle { font-size: 0.82rem; color: #ddd; font-weight: 500; }
+.module-nav-item.active .mtitle { color: white; }
+.module-nav-item.done .mtitle { color: #adb5bd; }
+/* Main content */
+.learning-main { flex: 1; overflow-y: auto; }
+.content-header { background: white; padding: 20px 30px; border-bottom: 1px solid #e9ecef; }
+.content-body { padding: 30px; max-width: 900px; }
+/* Video */
+.video-container { position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; border-radius: 15px; box-shadow: 0 10px 40px rgba(0,0,0,0.15); background: #000; }
+.video-container iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border-radius: 15px; }
+/* Text content */
+.text-content { background: white; border-radius: 15px; padding: 35px; line-height: 1.8; box-shadow: 0 5px 20px rgba(0,0,0,0.06); }
+.text-content h2 { font-size: 1.6rem; font-weight: 800; color: #1a1a2e; margin-bottom: 15px; }
+.text-content h3 { font-size: 1.2rem; font-weight: 700; color: #1a1a2e; margin: 25px 0 10px; }
+.text-content h4 { font-size: 1rem; font-weight: 700; color: var(--primary); margin: 20px 0 8px; }
+.text-content p { color: #555; margin-bottom: 15px; }
+.text-content ul, .text-content ol { color: #555; padding-left: 25px; margin-bottom: 15px; }
+.text-content li { margin-bottom: 6px; }
+.text-content pre { background: #1e1e2e; color: #cdd6f4; padding: 20px 25px; border-radius: 12px; overflow-x: auto; font-family: 'Fira Code', monospace; font-size: 0.875rem; line-height: 1.7; }
+.text-content code { background: #f0f0f5; color: var(--primary); padding: 2px 6px; border-radius: 4px; font-family: 'Fira Code', monospace; font-size: 0.9em; }
+.text-content pre code { background: transparent; color: inherit; padding: 0; }
+.text-content table { width: 100%; border-collapse: collapse; margin: 15px 0; border-radius: 10px; overflow: hidden; }
+.text-content table th { background: var(--primary); color: white; padding: 10px 15px; font-weight: 600; }
+.text-content table td { border: 1px solid #e9ecef; padding: 10px 15px; }
+.text-content table tr:nth-child(even) td { background: #f8f9fa; }
+/* Nav bottom */
+.bottom-nav { background: white; border-top: 1px solid #e9ecef; padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; }
+/* Complete btn */
+#complete-btn.done { background: #28a745 !important; }
+@media (max-width: 768px) { .course-sidebar-nav { display: none; } .content-body { padding: 15px; } }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="learning-layout">
+    <!-- Left Sidebar: Module List -->
+    <div class="course-sidebar-nav">
+        <div class="sidebar-header">
+            <h6>{{ course.title }}</h6>
+            {% if enrollment %}
+            <small>{{ enrollment.progress_percentage }}% complete</small>
+            <div class="progress-mini">
+                <div class="progress-mini-bar" style="width:{{ enrollment.progress_percentage }}%"></div>
+            </div>
+            {% endif %}
+        </div>
+        {% for m in modules %}
+        <a href="/courses/{{ course.slug }}/module/{{ m.id }}/"
+           class="module-nav-item d-flex align-items-center gap-2
+                  {% if m.id == module.id %}active{% elif progress_data|get_item:m.id %}done{% endif %}">
+            <div class="mnum">
+                {% if progress_data|get_item:m.id %}<i class="fas fa-check" style="font-size:0.7rem"></i>
+                {% elif m.id == module.id %}<i class="fas fa-play" style="font-size:0.7rem"></i>
+                {% else %}{{ forloop.counter }}{% endif %}
+            </div>
+            <div>
+                <div class="mtitle">{{ m.title }}</div>
+                {% if m.duration_minutes %}<div style="font-size:0.7rem;color:#6c757d">{{ m.duration_minutes }} min</div>{% endif %}
+            </div>
+        </a>
+        {% endfor %}
+    </div>
+
+    <!-- Main Learning Area -->
+    <div class="learning-main">
+        <!-- Header -->
+        <div class="content-header">
+            <div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
+                <div>
+                    <a href="/courses/{{ course.slug }}/" style="color:var(--primary);text-decoration:none;font-size:0.85rem">
+                        <i class="fas fa-arrow-left me-1"></i>Back to Course
+                    </a>
+                    <h4 class="mt-2 mb-1" style="font-weight:700">{{ module.title }}</h4>
+                    <div class="d-flex gap-3 text-muted" style="font-size:0.85rem">
+                        <span><i class="fas fa-{% if module.content_type == 'video' %}play-circle{% else %}file-alt{% endif %} me-1"></i>{{ module.get_content_type_display }}</span>
+                        {% if module.duration_minutes %}<span><i class="fas fa-clock me-1"></i>{{ module.duration_minutes }} minutes</span>{% endif %}
+                    </div>
+                </div>
+                {% if is_enrolled %}
+                <button id="complete-btn"
+                        onclick="markComplete({{ module.id }}, this)"
+                        class="btn btn-primary-custom {% if progress_data|get_item:module.id %}done{% endif %}"
+                        {% if progress_data|get_item:module.id %}disabled{% endif %}>
+                    {% if progress_data|get_item:module.id %}
+                    <i class="fas fa-check me-2"></i>Completed
+                    {% else %}
+                    <i class="fas fa-check-circle me-2"></i>Mark Complete
+                    {% endif %}
+                </button>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Content Area -->
+        <div class="content-body">
+
+            <!-- VIDEO -->
+            {% if module.youtube_url %}
+            <div class="video-container mb-4">
+                <iframe src="{{ module.get_youtube_embed }}"
+                        title="{{ module.title }}"
+                        frameborder="0"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                        allowfullscreen></iframe>
+            </div>
+            {% endif %}
+
+            <!-- IMAGE -->
+            {% if module.image or module.image_url %}
+            <div class="mb-4 text-center">
+                <img src="{{ module.get_image }}"
+                     alt="{{ module.image_caption|default:module.title }}"
+                     class="img-fluid rounded-3"
+                     style="max-height:500px;box-shadow:0 10px 30px rgba(0,0,0,0.1)">
+                {% if module.image_caption %}
+                <p class="text-muted mt-2 fst-italic small">{{ module.image_caption }}</p>
+                {% endif %}
+            </div>
+            {% endif %}
+
+            <!-- TEXT CONTENT -->
+            {% if module.text_content %}
+            <div class="text-content">
+                {{ module.text_content|safe }}
+            </div>
+            {% endif %}
+
+            {% if module.description and not module.text_content %}
+            <div class="text-content">
+                <p>{{ module.description }}</p>
+            </div>
+            {% endif %}
+
+            <!-- Navigation -->
+            <div class="bottom-nav mt-4 rounded-3">
+                <div>
+                    {% if prev_module %}
+                    <a href="/courses/{{ course.slug }}/module/{{ prev_module.id }}/" class="btn btn-outline-secondary rounded-pill">
+                        <i class="fas fa-chevron-left me-2"></i>Previous
+                    </a>
+                    {% endif %}
+                </div>
+                <a href="/courses/{{ course.slug }}/" class="btn btn-outline-secondary rounded-pill">
+                    <i class="fas fa-list me-1"></i>All Modules
+                </a>
+                <div>
+                    {% if next_module %}
+                    <a href="/courses/{{ course.slug }}/module/{{ next_module.id }}/" class="btn btn-primary-custom rounded-pill">
+                        Next <i class="fas fa-chevron-right ms-2"></i>
+                    </a>
+                    {% else %}
+                    <a href="/courses/{{ course.slug }}/" class="btn btn-success rounded-pill">
+                        <i class="fas fa-flag-checkered me-2"></i>Course Complete!
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function markComplete(moduleId, btn) {
+    fetch(`/courses/{{ course.slug }}/module/${moduleId}/complete/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': '{{ csrf_token }}',
+            'Content-Type': 'application/json'
+        }
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.success) {
+            btn.innerHTML = '<i class="fas fa-check me-2"></i>Completed';
+            btn.classList.add('done');
+            btn.disabled = true;
+            btn.style.background = '#28a745';
+
+            // Update sidebar
+            const sidebarItem = document.querySelector(`.module-nav-item.active .mnum`);
+            if (sidebarItem) {
+                sidebarItem.innerHTML = '<i class="fas fa-check" style="font-size:0.7rem"></i>';
+                sidebarItem.parentElement.classList.remove('active');
+                sidebarItem.parentElement.classList.add('done');
+            }
+
+            // Update progress
+            const progressBar = document.querySelector('.progress-mini-bar');
+            if (progressBar) {
+                progressBar.style.width = data.progress + '%';
+                document.querySelector('.sidebar-header small').textContent = data.progress + '% complete';
+            }
+
+            {% if next_module %}
+            setTimeout(() => {
+                window.location.href = '/courses/{{ course.slug }}/module/{{ next_module.id }}/';
+            }, 800);
+            {% endif %}
+        }
+    });
+}
+</script>
+{% endblock %}

@@ -1,0 +1,150 @@
+{% extends 'base.html' %}
+{% load course_extras %}
+{% block title %}My Dashboard - Ram Sir Platform{% endblock %}
+{% block extra_css %}
+<style>
+.dash-sidebar { width: 260px; flex-shrink: 0; }
+.dash-main { flex: 1; }
+.dash-layout { display: flex; gap: 25px; }
+.dash-nav { background: white; border-radius: 15px; padding: 20px; box-shadow: 0 5px 20px rgba(0,0,0,0.06); position: sticky; top: 90px; }
+.dash-nav-item { display: flex; align-items: center; gap: 12px; padding: 12px 15px; border-radius: 10px; text-decoration: none; color: #555; font-weight: 500; transition: all 0.3s; margin-bottom: 5px; }
+.dash-nav-item:hover, .dash-nav-item.active { background: rgba(255,107,53,0.08); color: var(--primary); }
+.dash-nav-item i { width: 20px; text-align: center; }
+.stat-card { background: white; border-radius: 15px; padding: 25px; box-shadow: 0 5px 20px rgba(0,0,0,0.06); }
+.stat-card .num { font-size: 2.5rem; font-weight: 800; }
+.enroll-card { background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 5px 15px rgba(0,0,0,0.06); transition: all 0.3s; }
+.enroll-card:hover { transform: translateY(-3px); box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+.course-icon-mini { width: 60px; height: 60px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.8rem; flex-shrink: 0; }
+.page-title { font-size: 1.5rem; font-weight: 800; color: #1a1a2e; margin-bottom: 5px; }
+@media(max-width:768px) { .dash-layout { flex-direction:column; } .dash-sidebar { width:100%; } .dash-nav { position:static; } }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="dash-layout">
+        <!-- Sidebar -->
+        <div class="dash-sidebar">
+            <div class="dash-nav">
+                <div class="d-flex align-items-center gap-3 mb-4 pb-3 border-bottom">
+                    <div style="width:50px;height:50px;border-radius:50%;background:var(--gradient);display:flex;align-items:center;justify-content:center;color:white;font-size:1.2rem;font-weight:700">
+                        {{ user.first_name|first|upper|default:user.username|first|upper }}
+                    </div>
+                    <div>
+                        <div style="font-weight:700;font-size:0.95rem">{{ user.get_full_name|default:user.username }}</div>
+                        <small class="text-muted">{{ user.email }}</small>
+                    </div>
+                </div>
+                <a href="/dashboard/" class="dash-nav-item active"><i class="fas fa-th-large"></i>Dashboard</a>
+                <a href="/dashboard/my-courses/" class="dash-nav-item"><i class="fas fa-graduation-cap"></i>My Courses</a>
+                <a href="/dashboard/progress/" class="dash-nav-item"><i class="fas fa-chart-line"></i>My Progress</a>
+                <a href="/dashboard/history/" class="dash-nav-item"><i class="fas fa-history"></i>My History</a>
+                <a href="/dashboard/profile/" class="dash-nav-item"><i class="fas fa-user-edit"></i>Edit Profile</a>
+                <hr>
+                <a href="/courses/" class="dash-nav-item"><i class="fas fa-search"></i>Browse Courses</a>
+                <a href="/events/" class="dash-nav-item"><i class="fas fa-calendar"></i>Events</a>
+                <a href="/accounts/logout/" class="dash-nav-item text-danger"><i class="fas fa-sign-out-alt"></i>Logout</a>
+            </div>
+        </div>
+
+        <!-- Main -->
+        <div class="dash-main">
+            <div class="page-title">Welcome back, {{ user.first_name|default:user.username }}! 👋</div>
+            <p class="text-muted mb-4">Here's your learning overview</p>
+
+            <!-- Stats -->
+            <div class="row g-4 mb-4">
+                <div class="col-md-3 col-6">
+                    <div class="stat-card text-center">
+                        <div class="num" style="color:var(--primary)">{{ total_enrolled }}</div>
+                        <div class="text-muted small">Courses Enrolled</div>
+                    </div>
+                </div>
+                <div class="col-md-3 col-6">
+                    <div class="stat-card text-center">
+                        <div class="num" style="color:#28a745">{{ completed_courses }}</div>
+                        <div class="text-muted small">Completed</div>
+                    </div>
+                </div>
+                <div class="col-md-3 col-6">
+                    <div class="stat-card text-center">
+                        <div class="num" style="color:var(--accent)">{{ total_modules_done }}</div>
+                        <div class="text-muted small">Modules Done</div>
+                    </div>
+                </div>
+                <div class="col-md-3 col-6">
+                    <div class="stat-card text-center">
+                        <div class="num" style="color:#f7931e">{{ upcoming_events|length }}</div>
+                        <div class="text-muted small">Upcoming Events</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Enrolled Courses -->
+            <div class="mb-4">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 style="font-weight:700">📚 My Courses</h5>
+                    <a href="/dashboard/my-courses/" style="color:var(--primary);text-decoration:none;font-size:0.9rem">View all →</a>
+                </div>
+                {% if enrollments %}
+                <div class="row g-3">
+                    {% for enrollment in enrollments|slice:":4" %}
+                    <div class="col-md-6">
+                        <div class="enroll-card p-3">
+                            <div class="d-flex gap-3 align-items-center mb-3">
+                                <div class="course-icon-mini" style="background:linear-gradient(135deg,#667eea,#764ba2)">
+                                    {% if 'Python' in enrollment.course.title %}🐍{% elif 'Java' in enrollment.course.title %}☕{% elif 'AI' in enrollment.course.title %}🤖{% elif 'DSA' in enrollment.course.title %}🌳{% elif 'SQL' in enrollment.course.title %}🗄️{% else %}📚{% endif %}
+                                </div>
+                                <div class="flex-grow-1">
+                                    <div style="font-weight:700;font-size:0.9rem">{{ enrollment.course.title|truncatechars:35 }}</div>
+                                    <small class="text-muted">{{ enrollment.get_status_display }}</small>
+                                </div>
+                                {% if enrollment.is_paid %}<span class="badge bg-warning text-dark">PAID</span>{% else %}<span class="badge bg-success">FREE</span>{% endif %}
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <small class="text-muted">Progress</small>
+                                <small style="font-weight:600;color:var(--primary)">{{ enrollment.progress_percentage }}%</small>
+                            </div>
+                            <div class="progress mb-3">
+                                <div class="progress-bar" style="width:{{ enrollment.progress_percentage }}%"></div>
+                            </div>
+                            <a href="/courses/{{ enrollment.course.slug }}/" class="btn btn-sm btn-primary-custom w-100">
+                                {% if enrollment.progress_percentage == 0 %}Start Learning{% else %}Continue{% endif %}
+                            </a>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="text-center py-5 bg-white rounded-3">
+                    <div style="font-size:3rem">📚</div>
+                    <h5 class="mt-3">No courses yet!</h5>
+                    <p class="text-muted">Explore our free courses and start learning today.</p>
+                    <a href="/courses/" class="btn btn-primary-custom">Browse Courses</a>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Upcoming Events -->
+            {% if upcoming_events %}
+            <div>
+                <h5 class="mb-3" style="font-weight:700">🎯 Upcoming Events</h5>
+                {% for event in upcoming_events %}
+                <div class="d-flex gap-3 align-items-center p-3 bg-white rounded-3 mb-2 shadow-sm">
+                    <div class="text-center px-3" style="min-width:60px;background:var(--gradient);border-radius:10px;padding:10px!important;color:white">
+                        <div style="font-size:1.3rem;font-weight:800;line-height:1">{{ event.event_date|date:"d" }}</div>
+                        <div style="font-size:0.7rem">{{ event.event_date|date:"M" }}</div>
+                    </div>
+                    <div class="flex-grow-1">
+                        <div style="font-weight:600">{{ event.title }}</div>
+                        <small class="text-muted">{{ event.location }}</small>
+                    </div>
+                    <a href="{{ event.registration_link }}" target="_blank" class="btn btn-sm btn-outline-primary-custom">Register</a>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

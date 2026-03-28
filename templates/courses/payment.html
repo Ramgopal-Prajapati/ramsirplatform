@@ -1,0 +1,125 @@
+{% extends 'base.html' %}
+{% block title %}Payment - {{ course.title }} | Ram Sir{% endblock %}
+{% block extra_css %}
+<style>
+.payment-step { background:white; border-radius:15px; padding:25px; box-shadow:0 5px 20px rgba(0,0,0,0.06); margin-bottom:20px; }
+.step-num { width:35px; height:35px; border-radius:50%; background:var(--gradient); color:white; display:flex; align-items:center; justify-content:center; font-weight:700; flex-shrink:0; }
+.upi-box { background:linear-gradient(135deg,#1a1a2e,#16213e); color:white; border-radius:15px; padding:25px; text-align:center; }
+.upi-id { font-size:1.5rem; font-weight:800; color:#ff6b35; letter-spacing:2px; }
+.price-big { font-size:3rem; font-weight:900; color:var(--primary); }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="d-flex gap-3 align-items-center mb-4">
+                <a href="/courses/{{ course.slug }}/" class="btn btn-outline-secondary rounded-pill"><i class="fas fa-arrow-left me-1"></i>Back</a>
+                <h3 style="font-weight:800;margin:0">Complete Payment</h3>
+            </div>
+
+            <!-- Course Summary -->
+            <div class="payment-step">
+                <div class="d-flex gap-3 align-items-center">
+                    <div style="width:70px;height:70px;border-radius:15px;background:var(--gradient);display:flex;align-items:center;justify-content:center;font-size:2rem">
+                        {% if 'Django' in course.title %}🌐{% elif 'ML' in course.title %}🧠{% elif 'AWS' in course.title %}☁️{% else %}🎯{% endif %}
+                    </div>
+                    <div class="flex-grow-1">
+                        <h5 style="font-weight:700;margin:0">{{ course.title }}</h5>
+                        <small class="text-muted">{{ course.get_level_display }} · {{ course.duration }}</small>
+                    </div>
+                    <div class="price-big">₹{{ course.price }}</div>
+                </div>
+            </div>
+
+            <div class="row g-4">
+                <!-- UPI Payment -->
+                <div class="col-md-6">
+                    <div class="payment-step h-100">
+                        <div class="d-flex gap-2 align-items-center mb-3">
+                            <div class="step-num">1</div>
+                            <h5 style="margin:0;font-weight:700">Pay via UPI</h5>
+                        </div>
+                        <div class="upi-box mb-3">
+                            <p class="mb-2 opacity-75 small">Send ₹{{ course.price }} to:</p>
+                            <div class="upi-id" id="upi-id">{{ upi_id }}</div>
+                            <p class="mt-2 opacity-75 small">OR call/WhatsApp</p>
+                            <div style="font-size:1.2rem;font-weight:700;color:#4facfe">+91 {{ phone }}</div>
+                        </div>
+                        <button onclick="copyUPI()" class="btn btn-outline-secondary w-100 rounded-pill">
+                            <i class="fas fa-copy me-2"></i>Copy UPI ID
+                        </button>
+                        <div class="mt-3 p-3" style="background:#f8f9ff;border-radius:10px">
+                            <small class="text-muted">
+                                <i class="fas fa-info-circle me-1 text-primary"></i>
+                                Pay via PhonePe, GPay, Paytm or any UPI app. After payment, fill the form with your transaction details.
+                            </small>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Form -->
+                <div class="col-md-6">
+                    <div class="payment-step h-100">
+                        <div class="d-flex gap-2 align-items-center mb-3">
+                            <div class="step-num">2</div>
+                            <h5 style="margin:0;font-weight:700">Submit Payment Details</h5>
+                        </div>
+                        <form method="POST" action="/payment/{{ course.slug }}/confirm/" enctype="multipart/form-data">
+                            {% csrf_token %}
+                            <div class="mb-3">
+                                <label class="form-label">Payment Method</label>
+                                <select name="payment_method" class="form-control" required>
+                                    <option value="">Select...</option>
+                                    <option value="PhonePe">PhonePe</option>
+                                    <option value="GPay">Google Pay</option>
+                                    <option value="Paytm">Paytm</option>
+                                    <option value="UPI">Other UPI</option>
+                                    <option value="Bank Transfer">Bank Transfer</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Transaction ID / UTR No. *</label>
+                                <input type="text" name="transaction_id" class="form-control" placeholder="12-digit transaction ID" required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Your UPI ID</label>
+                                <input type="text" name="upi_id" class="form-control" placeholder="yourname@upi">
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Payment Screenshot</label>
+                                <input type="file" name="screenshot" class="form-control" accept="image/*">
+                                <small class="text-muted">Recommended: Upload screenshot for faster verification</small>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Additional Notes</label>
+                                <textarea name="notes" class="form-control" rows="2" placeholder="Any info..."></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-primary-custom w-100 btn-lg">
+                                <i class="fas fa-paper-plane me-2"></i>Submit Payment
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <div class="alert alert-info mt-4">
+                <i class="fas fa-clock me-2"></i>
+                <strong>Verification Time:</strong> Your payment will be verified within 24 hours (usually faster). You'll get access immediately after verification. Contact us on WhatsApp if delayed.
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function copyUPI() {
+    const upi = document.getElementById('upi-id').textContent;
+    navigator.clipboard.writeText(upi).then(() => {
+        alert('UPI ID copied: ' + upi);
+    });
+}
+</script>
+{% endblock %}

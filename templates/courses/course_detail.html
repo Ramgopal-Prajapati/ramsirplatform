@@ -1,0 +1,272 @@
+{% extends 'base.html' %}
+{% load course_extras %}
+{% block title %}{{ course.title }} - Ram Sir Platform{% endblock %}
+{% block extra_css %}
+<style>
+.course-hero { background: linear-gradient(135deg, #1a1a2e, #16213e); color: white; padding: 60px 0; }
+.course-sidebar { position: sticky; top: 80px; }
+.price-card { background: white; border-radius: 20px; padding: 30px; box-shadow: 0 10px 40px rgba(0,0,0,0.1); }
+.module-item { border: 1px solid #e9ecef; border-radius: 10px; padding: 15px 20px; margin-bottom: 10px; background: white; transition: all 0.3s; cursor: pointer; }
+.module-item:hover { border-color: var(--primary); background: rgba(255,107,53,0.03); }
+.module-item.completed { border-color: #28a745; background: rgba(40,167,69,0.04); }
+.module-item.locked { opacity: 0.6; cursor: not-allowed; }
+.module-num { width: 35px; height: 35px; border-radius: 50%; background: rgba(255,107,53,0.1); color: var(--primary); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.85rem; flex-shrink: 0; }
+.module-num.done { background: #28a745; color: white; }
+.learn-item { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 8px; }
+.learn-item i { color: var(--primary); margin-top: 4px; flex-shrink: 0; }
+.tab-btn { border: none; background: transparent; padding: 12px 20px; font-weight: 600; color: #666; border-bottom: 3px solid transparent; transition: all 0.3s; }
+.tab-btn.active { color: var(--primary); border-color: var(--primary); }
+.review-star { font-size: 1.5rem; cursor: pointer; }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<div class="course-hero">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-8">
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb" style="background:transparent;padding:0">
+                        <li class="breadcrumb-item"><a href="/" style="color:#adb5bd">Home</a></li>
+                        <li class="breadcrumb-item"><a href="/courses/" style="color:#adb5bd">Courses</a></li>
+                        <li class="breadcrumb-item active text-white">{{ course.title }}</li>
+                    </ol>
+                </nav>
+                {% if course.category %}
+                <span class="badge rounded-pill mb-2" style="background:rgba(255,107,53,0.2);color:#ff6b35;padding:6px 14px">{{ course.category.name }}</span>
+                {% endif %}
+                <h1 class="fw-800 mt-2" style="font-weight:800">{{ course.title }}</h1>
+                <p class="opacity-75 mt-2 fs-5">{{ course.short_description }}</p>
+                <div class="d-flex flex-wrap gap-4 mt-3 opacity-75">
+                    <span><i class="fas fa-star me-1" style="color:#ffc107"></i>{{ course.rating }} rating</span>
+                    <span><i class="fas fa-users me-1"></i>{{ course.students_count }} students</span>
+                    <span><i class="fas fa-book me-1"></i>{{ all_modules|length }} modules</span>
+                    {% if course.duration %}<span><i class="fas fa-clock me-1"></i>{{ course.duration }}</span>{% endif %}
+                    <span><i class="fas fa-signal me-1"></i>{{ course.get_level_display }}</span>
+                </div>
+                <div class="d-flex align-items-center gap-2 mt-3">
+                    <img src="https://ramgopal-prajapati.github.io/ramsir/me.jpg"
+                         style="width:40px;height:40px;border-radius:50%;object-fit:cover;border:2px solid #ff6b35"
+                         onerror="this.src='https://ui-avatars.com/api/?name=Ram+Sir&size=40&background=ff6b35&color=fff'">
+                    <span class="opacity-75">By <strong class="text-white">{{ course.instructor_name }}</strong></span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container py-5">
+    <div class="row g-5">
+        <!-- Main Content -->
+        <div class="col-lg-8">
+            <!-- Tabs -->
+            <div class="border-bottom mb-4">
+                <button class="tab-btn active" onclick="showTab('overview', this)">Overview</button>
+                <button class="tab-btn" onclick="showTab('modules', this)">Modules ({{ all_modules|length }})</button>
+                <button class="tab-btn" onclick="showTab('reviews', this)">Reviews ({{ reviews|length }})</button>
+            </div>
+
+            <!-- Overview Tab -->
+            <div id="tab-overview">
+                {% if what_you_learn %}
+                <div class="mb-4 p-4" style="background:#fff8f5;border-radius:15px;border:1px solid #ffe0d0">
+                    <h4 class="fw-700 mb-3" style="font-weight:700">🎯 What You'll Learn</h4>
+                    <div class="row g-2">
+                        {% for item in what_you_learn %}
+                        {% if item.strip %}
+                        <div class="col-md-6">
+                            <div class="learn-item">
+                                <i class="fas fa-check-circle"></i>
+                                <span style="font-size:0.9rem">{{ item }}</span>
+                            </div>
+                        </div>
+                        {% endif %}
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+
+                <div class="mb-4">
+                    <h4 class="fw-700 mb-3" style="font-weight:700">📋 Course Description</h4>
+                    <p style="line-height:1.8;color:#555">{{ course.description }}</p>
+                </div>
+
+                {% if requirements %}
+                <div class="mb-4 p-4" style="background:#f8f9ff;border-radius:15px">
+                    <h4 class="fw-700 mb-3" style="font-weight:700">📌 Requirements</h4>
+                    <ul class="mb-0">
+                        {% for req in requirements %}
+                        {% if req.strip %}<li style="margin-bottom:6px">{{ req }}</li>{% endif %}
+                        {% endfor %}
+                    </ul>
+                </div>
+                {% endif %}
+
+                <!-- Instructor Card -->
+                <div class="p-4" style="background:linear-gradient(135deg,#1a1a2e,#16213e);border-radius:15px;color:white">
+                    <div class="d-flex align-items-center gap-3 mb-3">
+                        <img src="https://ramgopal-prajapati.github.io/ramsir/me.jpg"
+                             style="width:70px;height:70px;border-radius:50%;object-fit:cover;border:3px solid #ff6b35"
+                             onerror="this.src='https://ui-avatars.com/api/?name=Ram+Sir&size=70&background=ff6b35&color=fff'">
+                        <div>
+                            <h5 class="mb-0" style="font-weight:700">{{ course.instructor_name }}</h5>
+                            <small style="color:#adb5bd">Technical Trainer | Indore, M.P.</small>
+                        </div>
+                    </div>
+                    <p style="color:#adb5bd;font-size:0.9rem">{% if course.instructor_bio %}{{ course.instructor_bio }}{% else %}Ramgopal Prajapati is a Technical Trainer with 2+ years of experience, B.Tech IT graduate pursuing M.Tech. Expert in Python, Java, AI/ML, Data Science, Web Development and Cloud Computing.{% endif %}</p>
+                </div>
+            </div>
+
+            <!-- Modules Tab -->
+            <div id="tab-modules" style="display:none">
+                <h4 class="fw-700 mb-3" style="font-weight:700">📚 Course Modules</h4>
+                {% for module in all_modules %}
+                <div class="module-item {% if user_progress and user_progress|get_item:module.id %}completed{% endif %}"
+                     onclick="{% if is_enrolled or course.course_type == 'free' %}window.location='/courses/{{ course.slug }}/module/{{ module.id }}/'{% endif %}">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="module-num {% if user_progress and user_progress|get_item:module.id %}done{% endif %}">
+                            {% if user_progress and user_progress|get_item:module.id %}
+                            <i class="fas fa-check"></i>
+                            {% else %}
+                            {{ forloop.counter }}
+                            {% endif %}
+                        </div>
+                        <div class="flex-grow-1">
+                            <div class="fw-600" style="font-weight:600;font-size:0.9rem">{{ module.title }}</div>
+                            <div class="d-flex gap-3 mt-1" style="font-size:0.75rem;color:#adb5bd">
+                                <span><i class="fas fa-{% if module.content_type == 'video' %}play-circle{% elif module.content_type == 'text' %}file-alt{% else %}layer-group{% endif %} me-1"></i>{{ module.get_content_type_display }}</span>
+                                {% if module.duration_minutes %}<span><i class="fas fa-clock me-1"></i>{{ module.duration_minutes }} min</span>{% endif %}
+                                {% if module.is_preview and course.course_type == 'paid' %}<span class="text-success"><i class="fas fa-eye me-1"></i>Free Preview</span>{% endif %}
+                            </div>
+                        </div>
+                        {% if course.course_type == 'paid' and not is_enrolled and not module.is_preview %}
+                        <i class="fas fa-lock text-muted"></i>
+                        {% else %}
+                        <i class="fas fa-chevron-right text-muted"></i>
+                        {% endif %}
+                    </div>
+                </div>
+                {% empty %}
+                <p class="text-muted">Modules coming soon!</p>
+                {% endfor %}
+            </div>
+
+            <!-- Reviews Tab -->
+            <div id="tab-reviews" style="display:none">
+                <h4 class="fw-700 mb-4" style="font-weight:700">⭐ Student Reviews</h4>
+                {% if reviews %}
+                {% for review in reviews %}
+                <div class="mb-3 p-3" style="border:1px solid #e9ecef;border-radius:12px">
+                    <div class="d-flex align-items-center gap-2 mb-2">
+                        <div style="width:35px;height:35px;border-radius:50%;background:var(--gradient);display:flex;align-items:center;justify-content:center;color:white;font-weight:700">
+                            {{ review.user.first_name|first|upper }}
+                        </div>
+                        <div>
+                            <strong style="font-size:0.9rem">{{ review.user.get_full_name|default:review.user.username }}</strong>
+                            <div class="stars" style="font-size:0.8rem">{% for i in "12345"|make_list %}{% if forloop.counter <= review.rating %}★{% else %}☆{% endif %}{% endfor %}</div>
+                        </div>
+                        <small class="text-muted ms-auto">{{ review.created_at|date:"d M Y" }}</small>
+                    </div>
+                    <p class="mb-0 text-muted" style="font-size:0.9rem">{{ review.comment }}</p>
+                </div>
+                {% endfor %}
+                {% else %}
+                <p class="text-muted">No reviews yet. Be the first to review!</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="col-lg-4">
+            <div class="course-sidebar">
+                <div class="price-card">
+                    {% if course.course_type == 'free' %}
+                    <div class="text-center mb-4">
+                        <div style="font-size:2.5rem;font-weight:800;color:#28a745">FREE</div>
+                        <p class="text-muted small">No credit card required</p>
+                    </div>
+                    {% if user.is_authenticated %}
+                        {% if is_enrolled %}
+                        <div class="alert alert-success text-center mb-3">
+                            <i class="fas fa-check-circle me-2"></i>You're enrolled!
+                        </div>
+                        <a href="/courses/{{ course.slug }}/module/{{ modules.0.id }}/" class="btn btn-primary-custom w-100 btn-lg mb-3">
+                            Continue Learning <i class="fas fa-arrow-right ms-2"></i>
+                        </a>
+                        {% else %}
+                        <a href="/courses/{{ course.slug }}/enroll/" class="btn btn-primary-custom w-100 btn-lg mb-3">
+                            <i class="fas fa-graduation-cap me-2"></i>Enroll Free Now
+                        </a>
+                        {% endif %}
+                    {% else %}
+                    <a href="/accounts/register/" class="btn btn-primary-custom w-100 btn-lg mb-3">
+                        <i class="fas fa-user-plus me-2"></i>Register & Enroll Free
+                    </a>
+                    <a href="/accounts/login/" class="btn btn-outline-secondary w-100 mb-3">Already have account? Login</a>
+                    {% endif %}
+
+                    {% else %}
+                    <!-- Paid Course -->
+                    <div class="text-center mb-3">
+                        <div style="font-size:2.5rem;font-weight:800;color:var(--primary)">₹{{ course.price }}</div>
+                        <p class="text-muted small">One-time payment, lifetime access</p>
+                    </div>
+                    {% if user.is_authenticated %}
+                        {% if is_enrolled %}
+                        <div class="alert alert-success text-center mb-3">
+                            <i class="fas fa-check-circle me-2"></i>You're enrolled!
+                        </div>
+                        <a href="/courses/{{ course.slug }}/module/{{ modules.0.id }}/" class="btn btn-primary-custom w-100 btn-lg mb-3">
+                            Continue Learning <i class="fas fa-arrow-right ms-2"></i>
+                        </a>
+                        {% else %}
+                        <a href="/payment/{{ course.slug }}/" class="btn btn-primary-custom w-100 btn-lg mb-3">
+                            <i class="fas fa-lock-open me-2"></i>Buy Now - ₹{{ course.price }}
+                        </a>
+                        {% endif %}
+                    {% else %}
+                    <a href="/accounts/register/" class="btn btn-primary-custom w-100 btn-lg mb-3">
+                        Register to Purchase
+                    </a>
+                    {% endif %}
+                    {% endif %}
+
+                    <!-- Course Includes -->
+                    <div class="mt-3 pt-3 border-top">
+                        <p class="fw-600 mb-2" style="font-weight:600;font-size:0.9rem">This course includes:</p>
+                        <ul class="list-unstyled" style="font-size:0.85rem;color:#555">
+                            <li class="mb-2"><i class="fas fa-video me-2" style="color:var(--primary)"></i>Video lectures (YouTube)</li>
+                            <li class="mb-2"><i class="fas fa-file-alt me-2" style="color:var(--primary)"></i>Text notes & code examples</li>
+                            <li class="mb-2"><i class="fas fa-images me-2" style="color:var(--primary)"></i>Diagrams & visual content</li>
+                            <li class="mb-2"><i class="fas fa-infinity me-2" style="color:var(--primary)"></i>Lifetime access</li>
+                            <li class="mb-2"><i class="fas fa-mobile-alt me-2" style="color:var(--primary)"></i>Access on any device</li>
+                            <li class="mb-2"><i class="fas fa-chart-line me-2" style="color:var(--primary)"></i>Progress tracking</li>
+                        </ul>
+                    </div>
+
+                    <!-- Share -->
+                    <div class="mt-3 pt-3 border-top text-center">
+                        <small class="text-muted">Share this course:</small><br>
+                        <a href="https://wa.me/?text=Check out this course: {{ course.title }} on Ram Sir Platform!" target="_blank" class="btn btn-sm btn-success mt-2">
+                            <i class="fab fa-whatsapp me-1"></i>WhatsApp
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function showTab(name, btn) {
+    document.querySelectorAll('[id^="tab-"]').forEach(t => t.style.display = 'none');
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('tab-' + name).style.display = 'block';
+    btn.classList.add('active');
+}
+</script>
+{% endblock %}

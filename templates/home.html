@@ -1,0 +1,575 @@
+{% extends 'base.html' %}
+{% block title %}Ram Sir - Free Tech Courses | Python, Java, AI, DSA & More{% endblock %}
+
+{% block extra_css %}
+<style>
+/* Hero Section */
+.hero {
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    position: relative;
+    overflow: hidden;
+}
+.hero::before {
+    content: '';
+    position: absolute;
+    width: 600px; height: 600px;
+    background: radial-gradient(circle, rgba(255,107,53,0.15) 0%, transparent 70%);
+    top: -100px; right: -100px;
+    border-radius: 50%;
+}
+.hero::after {
+    content: '';
+    position: absolute;
+    width: 400px; height: 400px;
+    background: radial-gradient(circle, rgba(67,97,238,0.15) 0%, transparent 70%);
+    bottom: -50px; left: -50px;
+    border-radius: 50%;
+}
+.hero-content { position: relative; z-index: 2; }
+.hero-badge {
+    display: inline-block;
+    background: rgba(255,107,53,0.15);
+    border: 1px solid rgba(255,107,53,0.3);
+    color: #ff6b35;
+    padding: 6px 18px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin-bottom: 20px;
+    animation: pulse 2s infinite;
+}
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.7} }
+.hero h1 {
+    font-size: 3.5rem;
+    font-weight: 800;
+    color: white;
+    line-height: 1.2;
+}
+.hero h1 .highlight { color: var(--primary); }
+.hero p { color: #adb5bd; font-size: 1.1rem; max-width: 500px; }
+.hero-stats {
+    display: flex;
+    gap: 30px;
+    margin-top: 30px;
+}
+.hero-stat { text-align: center; }
+.hero-stat .num { font-size: 2rem; font-weight: 800; color: white; }
+.hero-stat .label { font-size: 0.8rem; color: #adb5bd; }
+.hero-image-wrap {
+    position: relative;
+    z-index: 2;
+    text-align: center;
+}
+.hero-img {
+    width: 340px;
+    height: 340px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 6px solid rgba(255,107,53,0.5);
+    box-shadow: 0 0 60px rgba(255,107,53,0.3);
+    animation: float 4s ease-in-out infinite;
+}
+@keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-15px)} }
+.floating-card {
+    position: absolute;
+    background: white;
+    border-radius: 12px;
+    padding: 10px 16px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #1a1a2e;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    animation: float 3s ease-in-out infinite;
+}
+.fc1 { top: 20px; left: -20px; animation-delay: 0.5s; }
+.fc2 { bottom: 60px; right: -30px; animation-delay: 1s; }
+.fc3 { bottom: 20px; left: 10px; animation-delay: 1.5s; }
+
+/* Section styling */
+.section-header { text-align: center; margin-bottom: 50px; }
+.section-header .tag {
+    background: rgba(255,107,53,0.1);
+    color: var(--primary);
+    padding: 5px 15px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    display: inline-block;
+    margin-bottom: 12px;
+}
+
+/* Course Card */
+.course-thumb {
+    height: 190px;
+    object-fit: cover;
+    width: 100%;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 3rem;
+}
+.course-thumb-placeholder {
+    height: 190px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 3.5rem;
+}
+.card-meta { display: flex; align-items: center; gap: 15px; font-size: 0.8rem; color: #6c757d; }
+.instructor-mini { display: flex; align-items: center; gap: 8px; }
+.instructor-mini img { width: 28px; height: 28px; border-radius: 50%; object-fit: cover; }
+
+/* Why section */
+.why-card {
+    background: white;
+    border-radius: 15px;
+    padding: 30px;
+    text-align: center;
+    transition: all 0.3s;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+    height: 100%;
+}
+.why-card:hover { transform: translateY(-5px); box-shadow: 0 15px 40px rgba(0,0,0,0.12); }
+.why-icon {
+    width: 70px; height: 70px;
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.8rem;
+    margin: 0 auto 20px;
+}
+
+/* About section */
+.about-section { background: linear-gradient(135deg, #1a1a2e, #16213e); color: white; padding: 80px 0; }
+.about-img { width: 300px; height: 300px; border-radius: 20px; object-fit: cover; border: 4px solid var(--primary); }
+.skill-bar-wrap { margin-bottom: 12px; }
+.skill-name { font-size: 0.85rem; font-weight: 600; margin-bottom: 4px; color: #ddd; }
+
+/* Events section */
+.event-card {
+    background: white;
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+    transition: all 0.3s;
+    display: flex;
+    align-items: stretch;
+}
+.event-card:hover { transform: translateY(-3px); box-shadow: 0 15px 40px rgba(0,0,0,0.15); }
+.event-date-box {
+    background: var(--gradient);
+    color: white;
+    padding: 20px;
+    text-align: center;
+    min-width: 80px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+.event-date-box .day { font-size: 2rem; font-weight: 800; line-height: 1; }
+.event-date-box .month { font-size: 0.8rem; font-weight: 600; }
+
+/* Testimonials */
+.review-card {
+    background: white;
+    border-radius: 15px;
+    padding: 25px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.07);
+    height: 100%;
+    border-left: 4px solid var(--primary);
+}
+
+/* CTA */
+.cta-section {
+    background: var(--gradient);
+    color: white;
+    padding: 80px 0;
+    text-align: center;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+
+<!-- Hero Section -->
+<section class="hero">
+    <div class="container">
+        <div class="row align-items-center g-5">
+            <div class="col-lg-6 hero-content">
+                <div class="hero-badge">🚀 #1 Free Tech Education Platform in Indore</div>
+                <h1>
+                    Learn Tech with<br>
+                    <span class="highlight">Ram Sir</span> &<br>
+                    Build Your Career
+                </h1>
+                <p class="mt-3">Master Python, Java, DSA, AI, Data Science & more with Ramgopal Prajapati — Technical Trainer, B.Tech IT graduate, pursuing M.Tech.</p>
+                <div class="d-flex gap-3 mt-4 flex-wrap">
+                    <a href="/courses/" class="btn btn-primary-custom btn-lg">
+                        <i class="fas fa-graduation-cap me-2"></i>Explore Courses
+                    </a>
+                    <a href="/accounts/register/" class="btn btn-outline-light btn-lg rounded-pill px-4">
+                        <i class="fas fa-user-plus me-2"></i>Join Free
+                    </a>
+                </div>
+                <div class="hero-stats mt-4">
+                    <div class="hero-stat">
+                        <div class="num">500+</div>
+                        <div class="label">Students</div>
+                    </div>
+                    <div class="hero-stat">
+                        <div class="num">15+</div>
+                        <div class="label">Courses</div>
+                    </div>
+                    <div class="hero-stat">
+                        <div class="num">4.9★</div>
+                        <div class="label">Rating</div>
+                    </div>
+                    <div class="hero-stat">
+                        <div class="num">Free</div>
+                        <div class="label">Most Courses</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6 hero-image-wrap text-center position-relative">
+                <img src="https://ramgopal-prajapati.github.io/ramsir/me.jpg"
+                     alt="Ram Sir - Ramgopal Prajapati"
+                     class="hero-img"
+                     onerror="this.src='https://ui-avatars.com/api/?name=Ram+Sir&size=340&background=ff6b35&color=fff&font-size=0.4'">
+                <div class="floating-card fc1">
+                    <span>🐍</span> Python Expert
+                </div>
+                <div class="floating-card fc2">
+                    <span>🤖</span> AI Trainer
+                </div>
+                <div class="floating-card fc3">
+                    <span>☁️</span> Cloud Engineer
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Categories Strip -->
+<section class="py-4 bg-white shadow-sm">
+    <div class="container">
+        <div class="d-flex flex-wrap gap-3 justify-content-center">
+            {% for cat in categories %}
+            <a href="/courses/?category={{ cat.id }}" class="text-decoration-none">
+                <span class="badge rounded-pill px-4 py-2 fs-6" style="background:{{ cat.color }}20; color:{{ cat.color }}; border: 1px solid {{ cat.color }}40; font-weight:600">
+                    <i class="{{ cat.icon }} me-2"></i>{{ cat.name }}
+                </span>
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<!-- Featured Free Courses -->
+<section class="py-5">
+    <div class="container">
+        <div class="section-header">
+            <div class="tag">🆓 Completely Free</div>
+            <h2 class="section-title">Popular <span>Free Courses</span></h2>
+            <p class="section-subtitle">Start learning today with no cost. Quality education for everyone!</p>
+        </div>
+        <div class="row g-4">
+            {% for course in free_courses %}
+            <div class="col-lg-3 col-md-6">
+                <div class="card-course h-100">
+                    <div class="course-thumb-placeholder" style="background: linear-gradient(135deg,
+                        {% if course.category.name == 'Programming' %}#667eea,#764ba2
+                        {% elif course.category.name == 'Data Science' %}#f093fb,#f5576c
+                        {% elif course.category.name == 'AI & ML' %}#4facfe,#00f2fe
+                        {% elif course.category.name == 'Database' %}#43e97b,#38f9d7
+                        {% else %}#fa709a,#fee140{% endif %})">
+                        <span>{{ course.category.icon|default:"📚" }}</span>
+                    </div>
+                    <div class="p-4">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="badge-free">FREE</span>
+                            <span class="badge-level">{{ course.get_level_display }}</span>
+                        </div>
+                        <h5 class="fw-700 mb-2" style="font-size:0.95rem;font-weight:700">{{ course.title }}</h5>
+                        <p class="text-muted small mb-3" style="font-size:0.8rem">{{ course.short_description|truncatechars:80 }}</p>
+                        <div class="card-meta mb-3">
+                            <span><i class="fas fa-book-open me-1"></i>{{ course.total_modules }} modules</span>
+                            <span><i class="fas fa-clock me-1"></i>{{ course.duration }}</span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <span class="stars">★★★★★</span>
+                                <small class="text-muted ms-1">{{ course.rating }}</small>
+                            </div>
+                            <a href="/courses/{{ course.slug }}/" class="btn btn-sm btn-primary-custom">Enroll Free</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        <div class="text-center mt-4">
+            <a href="/courses/?type=free" class="btn btn-outline-primary-custom btn-lg">
+                View All Free Courses <i class="fas fa-arrow-right ms-2"></i>
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- Paid Courses -->
+<section class="py-5" style="background: linear-gradient(135deg, #f8f9ff, #fff0eb);">
+    <div class="container">
+        <div class="section-header">
+            <div class="tag">💎 Premium Content</div>
+            <h2 class="section-title">Advanced <span>Paid Courses</span></h2>
+            <p class="section-subtitle">Take your skills to the next level with expert-curated advanced courses</p>
+        </div>
+        <div class="row g-4 justify-content-center">
+            {% for course in paid_courses %}
+            <div class="col-lg-4 col-md-6">
+                <div class="card-course h-100 position-relative">
+                    <div class="position-absolute top-0 end-0 m-3 z-1">
+                        <span class="badge-paid">PREMIUM</span>
+                    </div>
+                    <div class="course-thumb-placeholder" style="background: linear-gradient(135deg, #1a1a2e, #16213e);">
+                        <span style="font-size:3rem">{% if 'Django' in course.title %}🌐{% elif 'ML' in course.title or 'Deep' in course.title %}🧠{% elif 'AWS' in course.title %}☁️{% else %}🎯{% endif %}</span>
+                    </div>
+                    <div class="p-4">
+                        <h5 class="fw-700 mb-2" style="font-weight:700">{{ course.title }}</h5>
+                        <p class="text-muted small mb-3">{{ course.short_description|truncatechars:100 }}</p>
+                        <div class="card-meta mb-3">
+                            <span><i class="fas fa-clock me-1"></i>{{ course.duration }}</span>
+                            <span><i class="fas fa-signal me-1"></i>{{ course.get_level_display }}</span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <span class="fs-4 fw-800" style="color:var(--primary)">₹{{ course.price }}</span>
+                                <small class="text-muted ms-1 text-decoration-line-through">₹{{ course.price|floatformat:0|add:"1000" }}</small>
+                            </div>
+                            <a href="/courses/{{ course.slug }}/" class="btn btn-primary-custom">View Course</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        <div class="text-center mt-4">
+            <a href="/courses/?type=paid" class="btn btn-outline-primary-custom btn-lg">View All Premium Courses <i class="fas fa-arrow-right ms-2"></i></a>
+        </div>
+    </div>
+</section>
+
+<!-- About Ram Sir -->
+<section class="about-section">
+    <div class="container">
+        <div class="row g-5 align-items-center">
+            <div class="col-lg-5 text-center">
+                <img src="https://ramgopal-prajapati.github.io/ramsir/me.jpg"
+                     class="about-img"
+                     alt="Ramgopal Prajapati"
+                     onerror="this.src='https://ui-avatars.com/api/?name=Ram+Sir&size=300&background=ff6b35&color=fff'">
+                <div class="row g-3 mt-3">
+                    <div class="col-6">
+                        <div style="background:rgba(255,255,255,0.05);border-radius:12px;padding:15px;text-align:center">
+                            <div style="font-size:1.8rem;font-weight:800;color:var(--primary)">500+</div>
+                            <div style="font-size:0.8rem;color:#adb5bd">Students Taught</div>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div style="background:rgba(255,255,255,0.05);border-radius:12px;padding:15px;text-align:center">
+                            <div style="font-size:1.8rem;font-weight:800;color:var(--primary)">2+</div>
+                            <div style="font-size:0.8rem;color:#adb5bd">Years Training</div>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div style="background:rgba(255,255,255,0.05);border-radius:12px;padding:15px;text-align:center">
+                            <div style="font-size:1.8rem;font-weight:800;color:var(--primary)">15+</div>
+                            <div style="font-size:0.8rem;color:#adb5bd">Courses Created</div>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div style="background:rgba(255,255,255,0.05);border-radius:12px;padding:15px;text-align:center">
+                            <div style="font-size:1.8rem;font-weight:800;color:var(--primary)">4.9★</div>
+                            <div style="font-size:0.8rem;color:#adb5bd">Average Rating</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-7">
+                <div class="tag mb-3" style="background:rgba(255,107,53,0.15);color:#ff6b35;padding:5px 15px;border-radius:20px;font-size:0.85rem;font-weight:600;display:inline-block">👨‍💻 Your Instructor</div>
+                <h2 style="font-size:2.2rem;font-weight:800;color:white">Ramgopal Prajapati<br><span style="color:var(--primary)">Ram Sir</span></h2>
+                <p style="color:#adb5bd;margin-top:15px;line-height:1.8">
+                    Technical Trainer & Freelancer from <strong style="color:white">Indore, M.P.</strong> with 2+ years of experience in teaching programming and technology. Currently pursuing <strong style="color:white">M.Tech (Software Systems)</strong> at Patel College, Indore. Previously trained students at <strong style="color:white">Samyak Computer Classes & Infywings Education</strong>.
+                </p>
+                <p style="color:#adb5bd;margin-top:10px">Expert in Python, Django, Java, Data Science, AI/ML, Cloud Computing, Web Development, and more. Passionate about making tech education accessible to everyone.</p>
+                <div class="mt-4">
+                    <div class="skill-bar-wrap">
+                        <div class="skill-name">Python & Django</div>
+                        <div class="progress"><div class="progress-bar" style="width:90%"></div></div>
+                    </div>
+                    <div class="skill-bar-wrap">
+                        <div class="skill-name">Data Science & AI/ML</div>
+                        <div class="progress"><div class="progress-bar" style="width:85%"></div></div>
+                    </div>
+                    <div class="skill-bar-wrap">
+                        <div class="skill-name">Web Development (React, JS)</div>
+                        <div class="progress"><div class="progress-bar" style="width:80%"></div></div>
+                    </div>
+                    <div class="skill-bar-wrap">
+                        <div class="skill-name">Cloud Computing (AWS)</div>
+                        <div class="progress"><div class="progress-bar" style="width:80%"></div></div>
+                    </div>
+                </div>
+                <div class="d-flex gap-3 mt-4">
+                    <a href="/about/" class="btn btn-primary-custom">Read Full Profile</a>
+                    <a href="https://ramgopal-prajapati.github.io/Ramgopal/" target="_blank" class="btn btn-outline-light rounded-pill px-4">View Portfolio</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Why Choose Ram Sir -->
+<section class="py-5">
+    <div class="container">
+        <div class="section-header">
+            <div class="tag">🏆 Why Choose Us?</div>
+            <h2 class="section-title">Why Learn with <span>Ram Sir?</span></h2>
+        </div>
+        <div class="row g-4">
+            {% for item in "123456"|make_list %}
+            <div class="col-lg-4 col-md-6">
+                <div class="why-card">
+                    {% if forloop.counter == 1 %}
+                    <div class="why-icon" style="background:rgba(255,107,53,0.1)">🆓</div>
+                    <h5 class="fw-700">Mostly Free Content</h5>
+                    <p class="text-muted small">15+ high-quality courses absolutely free. Learn without spending a rupee!</p>
+                    {% elif forloop.counter == 2 %}
+                    <div class="why-icon" style="background:rgba(67,97,238,0.1)">🎯</div>
+                    <h5 class="fw-700">Industry-Ready Skills</h5>
+                    <p class="text-muted small">Curriculum designed for real-world jobs. Learn what companies actually need.</p>
+                    {% elif forloop.counter == 3 %}
+                    <div class="why-icon" style="background:rgba(46,196,182,0.1)">📺</div>
+                    <h5 class="fw-700">Video + Text + Code</h5>
+                    <p class="text-muted small">Multiple learning formats - YouTube videos, text notes, code examples, diagrams.</p>
+                    {% elif forloop.counter == 4 %}
+                    <div class="why-icon" style="background:rgba(247,147,30,0.1)">📊</div>
+                    <h5 class="fw-700">Track Your Progress</h5>
+                    <p class="text-muted small">Personal dashboard to track completion, progress, and course history.</p>
+                    {% elif forloop.counter == 5 %}
+                    <div class="why-icon" style="background:rgba(114,9,183,0.1)">🤖</div>
+                    <h5 class="fw-700">AI-Powered Learning</h5>
+                    <p class="text-muted small">Content updated with latest AI tools and market trends automatically.</p>
+                    {% elif forloop.counter == 6 %}
+                    <div class="why-icon" style="background:rgba(230,57,70,0.1)">🎓</div>
+                    <h5 class="fw-700">Expert Instructor</h5>
+                    <p class="text-muted small">Learn from Ramgopal Prajapati — M.Tech student, trainer at top institutes.</p>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<!-- Events Section -->
+{% if upcoming_events %}
+<section class="py-5" style="background: linear-gradient(135deg, #f8f9ff, #fff0eb);">
+    <div class="container">
+        <div class="section-header">
+            <div class="tag">🎯 Upcoming</div>
+            <h2 class="section-title">Tech <span>Events</span></h2>
+            <p class="section-subtitle">Join live workshops, webinars & bootcamps by Ram Sir</p>
+        </div>
+        <div class="row g-4">
+            {% for event in upcoming_events %}
+            <div class="col-lg-4">
+                <div class="event-card">
+                    <div class="event-date-box">
+                        <div class="day">{{ event.event_date|date:"d" }}</div>
+                        <div class="month">{{ event.event_date|date:"M Y" }}</div>
+                    </div>
+                    <div class="p-3 flex-grow-1">
+                        <span class="badge bg-primary rounded-pill mb-2" style="font-size:0.7rem">{{ event.event_type }}</span>
+                        <h6 class="fw-700 mb-1" style="font-weight:700">{{ event.title }}</h6>
+                        <p class="text-muted small mb-2">{{ event.description|truncatechars:80 }}</p>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <small class="text-muted"><i class="fas fa-map-marker-alt me-1"></i>{{ event.location }}</small>
+                            <a href="{{ event.registration_link }}" target="_blank" class="btn btn-sm btn-primary-custom">Register</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        <div class="text-center mt-4">
+            <a href="/events/" class="btn btn-outline-primary-custom btn-lg">View All Events <i class="fas fa-arrow-right ms-2"></i></a>
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<!-- Reviews -->
+<section class="py-5">
+    <div class="container">
+        <div class="section-header">
+            <div class="tag">💬 Student Feedback</div>
+            <h2 class="section-title">What Students <span>Say</span></h2>
+        </div>
+        <div class="row g-4">
+            <div class="col-lg-4">
+                <div class="review-card">
+                    <div class="stars mb-2">★★★★★</div>
+                    <p class="text-muted">"The sessions were clear, well-structured, and practical. I really appreciate how Ram Sir explained complex topics in a simple way."</p>
+                    <div class="d-flex align-items-center gap-2 mt-3">
+                        <img src="https://ramgopal-prajapati.github.io/ramsir/deviya.jpg" style="width:40px;height:40px;border-radius:50%;object-fit:cover" onerror="this.src='https://ui-avatars.com/api/?name=Divyanshi&size=40&background=ff6b35&color=fff'">
+                        <div><div class="fw-600" style="font-weight:600;font-size:0.9rem">Divyanshi Bhargava</div><small class="text-muted">Python Student</small></div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4">
+                <div class="review-card">
+                    <div class="stars mb-2">★★★★★</div>
+                    <p class="text-muted">"One of the best teachers I've learned from! They explain every concept in a simple and practical way. The classes are always engaging."</p>
+                    <div class="d-flex align-items-center gap-2 mt-3">
+                        <img src="https://ramgopal-prajapati.github.io/ramsir/kuldeep.jpg" style="width:40px;height:40px;border-radius:50%;object-fit:cover" onerror="this.src='https://ui-avatars.com/api/?name=Kuldeep&size=40&background=4361ee&color=fff'">
+                        <div><div class="fw-600" style="font-weight:600;font-size:0.9rem">Kuldeep Kumawat</div><small class="text-muted">Data Science Student</small></div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4">
+                <div class="review-card">
+                    <div class="stars mb-2">★★★★★</div>
+                    <p class="text-muted">"Your teaching methods are engaging and help me understand difficult topics easily. You always give your 100% so students can reach high levels!"</p>
+                    <div class="d-flex align-items-center gap-2 mt-3">
+                        <img src="https://ramgopal-prajapati.github.io/ramsir/palak.jpg" style="width:40px;height:40px;border-radius:50%;object-fit:cover" onerror="this.src='https://ui-avatars.com/api/?name=Palak&size=40&background=7209b7&color=fff'">
+                        <div><div class="fw-600" style="font-weight:600;font-size:0.9rem">Palak Parmar</div><small class="text-muted">Data Analytics Student</small></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA Section -->
+<section class="cta-section">
+    <div class="container">
+        <h2 class="display-5 fw-800" style="font-weight:800">Ready to Start Your Tech Journey?</h2>
+        <p class="lead mt-3 opacity-90">Join 500+ students learning programming, AI, Data Science & more — completely free!</p>
+        <div class="d-flex gap-3 justify-content-center mt-4 flex-wrap">
+            <a href="/accounts/register/" class="btn btn-light btn-lg rounded-pill px-5" style="color:var(--primary);font-weight:700">
+                <i class="fas fa-rocket me-2"></i>Start Learning Free
+            </a>
+            <a href="/courses/" class="btn btn-outline-light btn-lg rounded-pill px-4">Browse All Courses</a>
+        </div>
+    </div>
+</section>
+
+{% endblock %}

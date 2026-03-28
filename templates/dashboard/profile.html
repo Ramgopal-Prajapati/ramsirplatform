@@ -1,0 +1,97 @@
+{% extends 'base.html' %}
+{% block title %}Edit Profile - Ram Sir Platform{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="d-flex gap-3 align-items-center mb-4">
+                <a href="/dashboard/" class="btn btn-outline-secondary rounded-pill"><i class="fas fa-arrow-left me-1"></i>Dashboard</a>
+                <h3 style="font-weight:800;margin:0">Edit My Profile</h3>
+            </div>
+
+            <div class="row g-4">
+                <!-- Avatar Preview -->
+                <div class="col-md-4 text-center">
+                    <div style="background:white;border-radius:20px;padding:30px;box-shadow:0 5px 20px rgba(0,0,0,0.06)">
+                        {% if profile.avatar %}
+                        <img src="{{ profile.avatar.url }}" style="width:120px;height:120px;border-radius:50%;object-fit:cover;border:4px solid var(--primary)" alt="Avatar">
+                        {% else %}
+                        <div style="width:120px;height:120px;border-radius:50%;background:var(--gradient);display:flex;align-items:center;justify-content:center;color:white;font-size:3rem;font-weight:700;margin:0 auto">
+                            {{ user.first_name|first|upper|default:"?" }}
+                        </div>
+                        {% endif %}
+                        <div style="font-weight:700;margin-top:15px;font-size:1.1rem">{{ user.get_full_name|default:user.username }}</div>
+                        <div class="text-muted small">{{ user.email }}</div>
+                        <div class="badge bg-success mt-2">Student</div>
+                        <hr>
+                        <div class="text-start">
+                            {% if profile.city %}<p class="mb-1 small"><i class="fas fa-map-marker-alt me-2 text-primary"></i>{{ profile.city }}</p>{% endif %}
+                            {% if profile.college %}<p class="mb-1 small"><i class="fas fa-university me-2 text-primary"></i>{{ profile.college }}</p>{% endif %}
+                            {% if profile.phone %}<p class="mb-1 small"><i class="fas fa-phone me-2 text-primary"></i>{{ profile.phone }}</p>{% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Form -->
+                <div class="col-md-8">
+                    <div style="background:white;border-radius:20px;padding:30px;box-shadow:0 5px 20px rgba(0,0,0,0.06)">
+                        <form method="POST" enctype="multipart/form-data">
+                            {% csrf_token %}
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="form-label">First Name</label>
+                                    <input type="text" name="first_name" class="form-control" value="{{ form.first_name.value|default:user.first_name }}">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Last Name</label>
+                                    <input type="text" name="last_name" class="form-control" value="{{ form.last_name.value|default:user.last_name }}">
+                                </div>
+                                <div class="col-12">
+                                    <label class="form-label">Email</label>
+                                    <input type="email" name="email" class="form-control" value="{{ form.email.value|default:user.email }}">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Phone</label>
+                                    <input type="text" name="phone" class="form-control" value="{{ profile.phone|default:'' }}" placeholder="+91 9XXXXXXXXX">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">City</label>
+                                    <input type="text" name="city" class="form-control" value="{{ profile.city|default:'' }}" placeholder="Indore, MP">
+                                </div>
+                                <div class="col-12">
+                                    <label class="form-label">College/Institution</label>
+                                    <input type="text" name="college" class="form-control" value="{{ profile.college|default:'' }}" placeholder="Your college name">
+                                </div>
+                                <div class="col-12">
+                                    <label class="form-label">Bio</label>
+                                    <textarea name="bio" class="form-control" rows="3" placeholder="Tell something about yourself...">{{ profile.bio|default:'' }}</textarea>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">LinkedIn URL</label>
+                                    <input type="url" name="linkedin" class="form-control" value="{{ profile.linkedin|default:'' }}" placeholder="https://linkedin.com/in/...">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">GitHub URL</label>
+                                    <input type="url" name="github" class="form-control" value="{{ profile.github|default:'' }}" placeholder="https://github.com/...">
+                                </div>
+                                <div class="col-12">
+                                    <label class="form-label">Profile Photo</label>
+                                    <input type="file" name="avatar" class="form-control" accept="image/*">
+                                    <small class="text-muted">Upload JPG, PNG (max 2MB)</small>
+                                </div>
+                                <div class="col-12 mt-2">
+                                    <button type="submit" class="btn btn-primary-custom px-5">
+                                        <i class="fas fa-save me-2"></i>Save Changes
+                                    </button>
+                                    <a href="/dashboard/" class="btn btn-outline-secondary ms-3 rounded-pill px-4">Cancel</a>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
